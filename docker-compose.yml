@@ -1,0 +1,72 @@
+version: '3'
+
+services: 
+    es:
+        image: elasticsearch:${VERSION}
+        container_name: es
+        ports: 
+            - "9200:9200"
+            - "9300:9300"
+        restart: always
+        environment:
+            - "TZ=${TZ}"
+            - "discovery.type=single-node"      # 配置es启动单节点
+            - "cluster.name=EsForLog"           # 配置es集群名称
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # 配置es启动参数
+        volumes:
+        - ${ES_CONFIG}/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+        - ${ES_DATA}:/usr/share/elasticsearch/data
+        - ${ES_PLUGINS}:/usr/share/elasticsearch/plugins   # 插件
+        - ${ES_LOG}:/usr/share/elasticsearch/logs          # 日志
+        networks:
+            - elk-network
+        
+    kibana:
+        image:  kibana:${VERSION}
+        container_name: kibana
+        ports:
+            - "5601:5601"
+        restart: always
+        volumes:
+            - ${KIBANA_CONFIG}/kibana.yml:/usr/share/kibana/config/kibana.yml
+        depends_on:
+            - es # 依赖es，将会在es创建成功后才执行
+        environment:
+            TZ: "${TZ}"
+        networks:
+            - elk-network
+
+    logstash:
+        image: logstash:${VERSION}
+        restart: always
+        container_name: logstash
+        ports:
+        - "5044:5044"
+        volumes:
+            - ${LOGSTASH_CONFIG}/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
+            - ${LOGSTASH_CONFIG}/logstash.yml:/usr/share/logstash/config/logstash.yml
+            - ${LOGSTASH_DATA}:/usr/share/logstash/data
+        depends_on:
+            - es # 依赖es，将会在es创建成功后才执行
+        environment:
+            TZ: "${TZ}"
+        networks:
+            - elk-network
+
+    head:     # elasticsearch可视化Head插件
+        image: mobz/elasticsearch-head:5
+        container_name: head
+        restart: always
+        ports:
+        - "9100:9100"
+        environment:
+            TZ: "${TZ}"
+        networks:
+            - elk-network
+
+
+networks:
+    elk-network:
+        ipam:
+            config:
+                - subnet: 172.50.0.0/16

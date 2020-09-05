@@ -1,0 +1,8 @@
+/.idea
+/.vscode
+/.vagrant
+/data/elasticsearch/*
+/data/logstash/*
+/eslog/*
+
+
