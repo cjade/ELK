@@ -1,8 +1,5 @@
 /.idea
 /.vscode
 /.vagrant
-/data/elasticsearch/*.gitkeep
-/data/logstash/*.gitkeep
-/eslogs/*.gitkeep
 
 
