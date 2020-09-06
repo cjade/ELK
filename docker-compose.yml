@@ -46,6 +46,7 @@ services:
             - ${LOGSTASH_CONFIG}/logstash.conf:/usr/share/logstash/pipeline/logstash.conf
             - ${LOGSTASH_CONFIG}/logstash.yml:/usr/share/logstash/config/logstash.yml
             - ${LOGSTASH_DATA}:/usr/share/logstash/data
+            - ${LOGS}:/usr/share/logstash/logs
         depends_on:
             - es # 依赖es，将会在es创建成功后才执行
         environment:
